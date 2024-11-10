@@ -6,24 +6,57 @@
 //
 
 import UIKit
+import WebKit
 
-class AuthViewController: UIViewController {
 
+
+class AuthViewController: UIViewController, WKNavigationDelegate {
+    
+    // Web sayfasını göstermek için bir WKWebView tanımlarız
+    private let webView: WKWebView = {
+        let prefs = WKWebpagePreferences()
+        prefs.allowsContentJavaScript = true  // JavaScript içeriğini çalıştırmaya izin ver
+        let config = WKWebViewConfiguration()
+        config.defaultWebpagePreferences = prefs  // Konfigürasyona tercihleri ekle
+        let webView = WKWebView(frame: .zero, configuration: config)  // Belirtilen konfigürasyonla webView oluştur
+        
+        return webView  // webView nesnesini döndür
+    }()
+    
+    // Tamamlandığında dönecek sonucu belirleyen bir kapanış (closure) tanımlanır
+    public var completionHandler: ((Bool) -> Void)?
+
+    // viewDidLoad() görünüm yüklendiğinde çağrılır
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        title = "Sign In"  // Başlığı "Sign In" olarak ayarla
+        view.backgroundColor = .systemBackground  // Arka plan rengini sistem arka plan rengi olarak ayarla
+        webView.navigationDelegate = self  // webView'in navigationDelegate özelliğini bu sınıfa ayarla
+        view.addSubview(webView)  // webView'i ana görünüme ekle
+        guard let url = AuthManager.shared.signInURL else {
+            return  // Eğer geçerli bir URL yoksa fonksiyondan çık
+        }
+        
+        webView.load(URLRequest(url: url))  // webView'e kimlik doğrulama URL'sini yükle
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // viewDidLayoutSubviews() görünüm düzenlenirken çağrılır, burada webView'i tam ekran yaparız
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        webView.frame = view.bounds  // webView'i ekranın tamamına yerleştir
     }
-    */
-
+    
+    // webView yüklemeye başladığında çağrılır
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        guard let url = webView.url else {
+            return  // Eğer geçerli bir URL yoksa fonksiyondan çık
+        }
+        
+        // Giriş işlemi başarılı olduğunda erişim kodunu alırız
+        guard let code = URLComponents(string: url.absoluteString)?.queryItems?.first(where: { $0.name == "code" })?.value else {
+            return  // Eğer "code" parametresi bulunamazsa fonksiyondan çık
+        }
+        
+        print("Code: \(code)")  // Kod konsola yazdırılır
+    }
 }

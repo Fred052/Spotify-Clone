@@ -56,7 +56,14 @@ class AuthViewController: UIViewController, WKNavigationDelegate {
         guard let code = URLComponents(string: url.absoluteString)?.queryItems?.first(where: { $0.name == "code" })?.value else {
             return  // Eğer "code" parametresi bulunamazsa fonksiyondan çık
         }
+        webView.isHidden = true
         
         print("Code: \(code)")  // Kod konsola yazdırılır
+        AuthManager.shared.exchangeCodeForToken(code: code) { [weak self ] success in
+            DispatchQueue.main.async {
+                self?.navigationController?.popViewController(animated: true)
+                self?.completionHandler?(success)
+            }
+        }
     }
 }

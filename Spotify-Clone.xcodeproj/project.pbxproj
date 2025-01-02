@@ -77,8 +77,6 @@
 				7FD0E83F2CDDFEFC00B60285 /* Spotify-Clone */,
 			);
 			name = "Spotify-Clone";
-			packageProductDependencies = (
-			);
 			productName = "Spotify-Clone";
 			productReference = 7FD0E83D2CDDFEFC00B60285 /* Spotify-Clone.app */;
 			productType = "com.apple.product-type.application";
